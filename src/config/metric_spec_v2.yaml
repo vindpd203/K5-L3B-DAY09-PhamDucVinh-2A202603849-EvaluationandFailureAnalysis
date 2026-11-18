@@ -16,10 +16,22 @@ metrics:
      threshold: {min: 0.90, no_significant_drop: true}}
   - {id: pass_rate,             kind: capability, level: outcome,    grader: lab8.metrics.trial_pass, blocking: true,
      threshold: {min: 0.85, no_significant_drop: true}}
-  # TODO M6: add a blocking pass_hat_5 metric. Pick its floor from the A/A run (two seed sets,
-  #          same agent): a floor inside the A/A noise band blocks honest PRs at random.
+  # M6: pass^5 = probability all 5 seed runs pass. A/A noise on MockLLM is exactly 0 (deterministic
+  # replay), so the floor sits far outside the band; with a real LLM the band is > 0 and the floor
+  # must stay above it (see eval_card v2). Floor 0.85 >= 0.8 and blocks flaky_regression (0.8214)
+  # while the average pass_rate still looks fine.
+  - {id: pass_hat_5,            kind: capability, level: outcome,    grader: lab9.stats.pass_hat_k, threshold: {min: 0.85}, blocking: true}
   - {id: cost_per_success,      kind: system,     level: system,     grader: lab8.metrics.summarize, threshold: {max_increase: 0.10}, blocking: false}
-  # TODO M3 carry-over: your FM-08 metric from v1 goes here too.
+  # M3 carry-over: FM-08 (reply states an amount the ledger does not hold). The swarm baseline
+  # sits at ~0.7857 (approval-cap + prior-deduction cases where it reports its own quote), so the
+  # floor is 0.75; blocking via no_significant_drop catches a PR that misreports MORE than the
+  # baseline does (e.g. a misreport switch: reply states the proposal, not the committed amount).
+  - {id: reply_ledger_match,    kind: capability, level: outcome,    grader: code, blocking: true,
+     threshold: {min: 0.75, no_significant_drop: true}}
 slices:
-  # TODO M5: add at least money_movement and adversarial. Example of the shape:
-  - {name: denial, metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}
+  # M5: an average can hide a slice regression. money_movement catches slice_regression
+  # (average pass_rate stays above its floor and its CI touches 0); adversarial catches an
+  # agent that starts falling for the attack pack. Floors sit above the noise band (A/A = 0).
+  - {name: money_movement, metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}
+  - {name: adversarial,    metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}
+  - {name: denial,         metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}
