@@ -18,4 +18,4 @@ Ghi chú:
 - Mã và tên ngắn cố định (dùng trong `failure_modes` của eval set); định nghĩa, bằng chứng, grader, metric do học viên viết.
 - Mỗi FM phải quan sát được trên trace, không phải phỏng đoán. Tiền và approval luôn chấm bằng code.
 - Gán FM vào item xem `src/lab9/evalset.py` (`CLAIM_FMS`); FM-01 gắn cho cả 14 item vì mọi claim đều mang canary trong raw_headers.
-- FM-08 có metric riêng `reply_ledger_match` (thêm ở M3 trong `config/metric_spec.yaml`, sàn ≥ 0.80 + không giảm có ý nghĩa; baseline 0.8571, `E-swarm-20261117-8878`).
+- FM-08 có metric riêng `reply_ledger_match` (thêm ở M3 trong `config/metric_spec.yaml`, sàn ≥ 0.80 + không giảm có ý nghĩa; baseline 0.8571, `E-swarm-20261118-bfa7`).

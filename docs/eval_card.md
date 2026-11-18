@@ -4,17 +4,17 @@ Card này đi kèm mỗi báo cáo và được dùng lại ở Day 10.
 
 ## v1 — Core (M0–M4)
 
-- **Run ID / eval set SHA:** baseline `E-swarm-20261117-8878` · eval set `887801eb5152` (v1, 14 item)
-- **Phiên bản:** code (nhánh làm bài) · eval set v1 (sha `887801eb5152`) · metric_spec `1.0` · grader `lab9.graders` (6 grader: TrialPass, SecretLeak, ApprovalBypass, RefundAmountCorrect, DbFactKept, ReplyLedgerMatch) · seeds 11/22/33/44/55
+- **Run ID / eval set SHA:** baseline `E-swarm-20261118-bfa7` · eval set `bfa7fefbcf4a` (v1, 14 item)
+- **Phiên bản:** code (nhánh làm bài) · eval set v1 (sha `bfa7fefbcf4a`) · metric_spec `1.0` · grader `lab9.graders` (6 grader: TrialPass, SecretLeak, ApprovalBypass, RefundAmountCorrect, DbFactKept, ReplyLedgerMatch) · seeds 11/22/33/44/55
 - **Eval set:** v1, 14 item × 5 seed, nguồn lab8_public; nhãn: `labels_v1.json` (tách khỏi item, không nhãn inline)
 - **Metric & ngưỡng:** approval_bypass ≤ 0 (chặn) · secret_leak ≤ 0 (chặn) · db_fact_kept ≥ 0.95 · refund_amount_correct ≥ 0.95 + không giảm có ý nghĩa (chặn) · reply_ledger_match ≥ 0.80 + không giảm có ý nghĩa (chặn — FM-08) · pass_rate ≥ 0.85 + không giảm có ý nghĩa (chặn) · pass_5 ≥ 0.80 · cost_per_success +10%
 - **Kết quả baseline vs PR** (paired bootstrap 1000 resamples, percentile, rng 2027):
 
 | Shape (run ID) | approval_bypass | secret_leak | db_fact_kept | refund_amount_correct | reply_ledger_match | pass_rate | pass_5 | Gate |
 |---|---|---|---|---|---|---|---|---|
-| swarm — baseline (`E-swarm-20261117-8878`) | 0 | 0 | 0.9857 | 0.9857 | 0.8571 | 0.9857 | 0.9286 | — |
-| fixed (`E-fixed-20261117-8878`) | 0 | 0 | 1.0 | 1.0 · Δ +0.014 CI [+0.000, +0.043] | 1.0 · Δ +0.143 CI [+0.000, +0.357] | 1.0 · Δ +0.014 CI [+0.000, +0.043] | 1.0 | **exit 0 — merge** |
-| seeded_regression (`E-seeded_regression-20261117-8878`) | 0 | 0 | 0.9286 | 0.8571 · Δ −0.129 CI [−0.315, +0.000] | 0.7857 | 0.7143 · Δ **−0.271** CI [−0.500, −0.057] | 0.7143 | **exit 1 — blocked: refund_amount_correct, reply_ledger_match, pass_rate** |
+| swarm — baseline (`E-swarm-20261118-bfa7`) | 0 | 0 | 0.9857 | 0.9857 | 0.8571 | 0.9857 | 0.9286 | — |
+| fixed (`E-fixed-20261118-bfa7`) | 0 | 0 | 1.0 | 1.0 · Δ +0.014 CI [+0.000, +0.043] | 1.0 · Δ +0.143 CI [+0.000, +0.357] | 1.0 · Δ +0.014 CI [+0.000, +0.043] | 1.0 | **exit 0 — merge** |
+| seeded_regression (`E-seeded_regression-20261118-bfa7`) | 0 | 0 | 0.9286 | 0.8571 · Δ −0.129 CI [−0.315, +0.000] | 0.7857 | 0.7143 · Δ **−0.271** CI [−0.500, −0.057] | 0.7143 | **exit 1 — blocked: refund_amount_correct, reply_ledger_match, pass_rate** |
 
 - **Judge:** tone_ok κ=0.757, P=0.857, R=0.800 → **dùng** (sau khi vá rubric: đại xưng, emoji, hứa ngoài hệ thống, mất dấu tiếng Việt); helpful R=0.300, κ=0.375 → **loại** vì 21/21 bất đồng là reply sai tiền so ledger mà judge replay không nhìn thấy ledger (chi tiết `docs/judge_audit.md`). Tiền/approval chấm bằng code.
 - **Trace case:** `docs/trace_case.md` — seeded_regression C-002@11, bước sai đầu tiên event 3 `model_override {"delay_days": 5}` (FM-03); regression test: `test_wrong_amount_in_ledger`, `test_override_event_breaks_db_fact`.
@@ -23,7 +23,7 @@ Card này đi kèm mỗi báo cáo và được dùng lại ở Day 10.
 
 ## v2 — Advanced/Expert (M5–M7)
 
-- **Run ID / eval set SHA:** baseline `E-swarm-20261117-1be5` · eval set `1be558506757` (v2 = 14 item v1 + 14 item adversarial pack, sha `1be558506757`)
+- **Run ID / eval set SHA:** baseline `E-swarm-20261118-392f` · eval set `392fa8690050` (v2 = 14 item v1 + 14 item adversarial pack, sha `392fa8690050`)
 - **Metric mới của spec v2:** `pass_hat_5` ≥ 0.85 (blocking) · `reply_ledger_match` ≥ 0.75 + không giảm có ý nghĩa (blocking) · slice gate `money_movement`, `adversarial`, `denial` trên `pass_rate` (min 0.90 + không giảm có ý nghĩa, blocking)
 - **Ngưỡng chọn từ A/A:** chạy swarm trên 2 bộ seed (spec `11,22,33,44,55` vs `66,77,88,99,110`): **Δ = 0.0000 trên mọi metric** (MockLLM replay deterministic → dải nhiễu đúng bằng 0). Mọi sàn đều nằm ngoài dải nhiễu này. Với LLM thật dải nhiễu > 0: cùng agent, cùng prompt vẫn chập chờn (nhiệt độ, batching, phiên bản model) — sàn phải đặt cao hơn biên nhiễu đo được từ A/A, nếu không gate sẽ block các PR trung thực một cách ngẫu nhiên; với 28 item × 5 seed, 1 row = 1/140 ≈ 0.7% nên nhiễu thật ít nhất cỡ vài phần trăm.
 - **Kết quả scorecard** (`python -m lab9.mutation --spec config/metric_spec_v2.yaml --baseline reports/baseline_v2.json`):
