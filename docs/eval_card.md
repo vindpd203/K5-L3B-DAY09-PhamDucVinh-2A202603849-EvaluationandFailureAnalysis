@@ -42,6 +42,22 @@ mutation score **3/3 · false alarms 0** · `--detect`: detection **80.00%** (�
 - **Giới hạn cỡ mẫu:** bug chỉ xuất hiện ở 1/3 seed (mod `rare`: seed chia hết cho 3) với 5 seed chỉ có kỳ vọng ~1.7 seed dính lỗi — nhiễu lấy mẫu lớn, không phát hiện ổn định được; đừng hạ ngưỡng cho tới khi gate "bắt được" nó (thêm seed/item thay vì nới lỏng). pass^5 của một item bị lỗi 1/5 seed = 0, nên `pass_hat_5` chỉ chặn khi ≥ vài item bị ảnh hưởng (flaky_regression: 5/28 item → 0.8214 < 0.85).
 - **Khi nào tăng eval-set version:** thêm item từ trace case mới hoặc pack adversarial → tăng `eval_set_version`, chạy lại baseline; đổi ngưỡng/metric → tăng `metric_spec_version`, ratchet chỉ cho chặt hơn trên cùng version (`integrity_check` tự từ chối spec nới lỏng).
 
+## Bonus — port grader sang Inspect AI
+
+- **Cái gì:** `src/lab9/inspect_port.py` port 3 grader code (`approval_bypass`, `refund_amount_correct`, `reply_ledger_match` cho FM-08) sang scorer của **Inspect AI 0.3.291**. Agent chạy một lần mỗi (item, seed) qua đúng task của `lab9.eval` (MockLLM, cùng trace); Trial nằm trong `Sample.metadata`, nhãn trong `Sample.target`; solver `replay` không gọi model. Script so **từng ô (item, seed, metric)** với `reports/eval_<shape>.json` (pydantic-evals), exit 1 nếu lệch.
+- **Chạy:** `python -m pip install inspect-ai==0.3.291` (không thêm vào `requirements-lab9.txt`, CI không cần) rồi `python -m lab9.inspect_port` và `python -m lab9.inspect_port --spec config/metric_spec_v2.yaml --shapes slice_regression`.
+- **Kết quả: 0 ô lệch** trên 350 lượt (item, seed) × 3 metric:
+
+| Shape (report) | n | approval_bypass | refund_amount_correct | reply_ledger_match |
+|---|---|---|---|---|
+| swarm (`E-swarm-20261118-bfa7`) | 70 | 0.0 = 0.0 | 0.9857 = 0.9857 | 0.8571 = 0.8571 |
+| fixed (`E-fixed-20261118-bfa7`) | 70 | 0.0 = 0.0 | 1.0 = 1.0 | 1.0 = 1.0 |
+| seeded_regression (`E-seeded_regression-20261118-bfa7`) | 70 | 0.0 = 0.0 | 0.8571 = 0.8571 | 0.7857 = 0.7857 |
+| slice_regression (`E-slice_regression-20261118-392f`) | 140 | 0.0 = 0.0 | 0.9357 = 0.9357 | 1.0 = 1.0 |
+
+(giá trị Inspect = pydantic-evals; `approval_bypass` là tỉ lệ vi phạm, phải bằng 0)
+- **Giới hạn của phép so:** không shape công khai nào tạo ra approval bypass, nên ca dương tính của `approval_bypass` chỉ được kiểm trên Trial dựng tay: `tests/test_inspect_port.py` (16 test, tự skip khi chưa cài `inspect_ai`) so Inspect với pydantic-evals trên bypass, dòng ledger lạ, misreport FM-08 và fallback `proposal_amount`. Hai harness dùng chung `stated_amount()` để đọc số tiền trong reply, nên phép so chứng minh việc chuyển dữ liệu (target/metadata → scorer) là đúng, không phải hai cách parse reply độc lập.
+
 ## Giới hạn chung / bằng chứng còn thiếu
 
 - MockLLM replay deterministic: A/A Δ = 0 là đặc tính của mock, không phải của model thật; chưa đo nhiễu trên LLM thật.
