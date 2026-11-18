@@ -44,7 +44,7 @@ Quy tắc: tiền và phê duyệt luôn chấm bằng code. Judge chỉ dùng c
 
 ## 5. Cổng release
 - Lệnh: `python -m lab9.gate --pr reports/eval_<shape>.json --baseline reports/baseline_v1.json`
-- Baseline lấy từ nhánh được bảo vệ, phủ đủ 14 item × 5 seed; eval_set_sha của PR phải trùng baseline (`eb489a3380c9`).
+- Baseline lấy từ nhánh được bảo vệ, phủ đủ 14 item × 5 seed; eval_set_sha của PR phải trùng baseline (`887801eb5152`).
 - Gate exit 1 → **không merge**. Người xử lý: eval owner (học viên giữ gate trong fork). Ngoại lệ (waiver) cần: product owner + eval owner cùng duyệt, ghi lý do vào PR và chỉ áp dụng cho một PR, không đổi ngưỡng trong spec.
 - Bằng chứng hoạt động: gate **exit 0** cho `fixed` (`E-fixed-20261117-8878`, pass_rate Δ +0.014 CI [+0.000, +0.043]); gate **exit 1** chặn `seeded_regression` (`E-seeded_regression-20261117-8878`, pass_rate Δ −0.271 CI [−0.500, −0.057] ⇒ BLOCK, blocked: refund_amount_correct, reply_ledger_match, pass_rate).
 
